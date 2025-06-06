@@ -1,0 +1,180 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  MANAGER
+  ADMIN
+  CASHIER
+  WAITER
+}
+
+enum OrderStatus {
+  OPEN
+  PAID
+  CANCELLED
+}
+
+enum PaymentType {
+  CASH
+  CARD
+  QR
+  OTHER
+}
+
+model User {
+  id            String    @id @default(uuid())
+  fullName      String
+  username      String    @unique
+  passwordHash  String
+  role          UserRole
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  createdOrders Order[]   @relation("CreatedBy")
+  paidOrders    Order[]   @relation("PaidBy")
+  payments      Payment[]
+  shifts        ShiftStaff[]
+  managedShifts Shift[]   @relation("ManagedBy")
+  deliveries    Delivery[]
+  menuItems     MenuItem[]
+}
+
+model Ingredient {
+  id            Int       @id @default(autoincrement())
+  name          String
+  unit          String
+  currentPrice  Decimal
+  inStock       Decimal
+  createdAt     DateTime  @default(now())
+  deliveries    Delivery[]
+  menuItems     MenuIngredient[]
+  stopList      IngredientStopList[]
+}
+
+model Supplier {
+  id            Int       @id @default(autoincrement())
+  name          String
+  phone         String?
+  deliveries    Delivery[]
+}
+
+model Delivery {
+  id            Int       @id @default(autoincrement())
+  ingredient    Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId  Int
+  supplier      Supplier  @relation(fields: [supplierId], references: [id])
+  supplierId    Int
+  quantity      Decimal
+  pricePerUnit  Decimal
+  deliveryDate  DateTime
+  createdBy     User      @relation(fields: [createdById], references: [id])
+  createdById   String
+}
+
+model MenuItem {
+  id            Int       @id @default(autoincrement())
+  name          String
+  description   String?
+  price         Decimal
+  costPrice     Decimal
+  imageUrl      String?
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  createdBy     User      @relation(fields: [createdById], references: [id])
+  createdById   String
+  ingredients   MenuIngredient[]
+  orderItems    OrderItem[]
+  stopList      MenuStopList[]
+}
+
+model MenuIngredient {
+  id            Int       @id @default(autoincrement())
+  menuItem      MenuItem  @relation(fields: [menuItemId], references: [id])
+  menuItemId    Int
+  ingredient    Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId  Int
+  quantity      Decimal
+}
+
+model Shift {
+  id            Int       @id @default(autoincrement())
+  startedAt     DateTime
+  endedAt       DateTime?
+  isActive      Boolean   @default(true)
+  manager       User      @relation("ManagedBy", fields: [managerId], references: [id])
+  managerId     String
+  staff         ShiftStaff[]
+  orders        Order[]
+  menuStopList  MenuStopList[]
+  ingredientStopList IngredientStopList[]
+}
+
+model ShiftStaff {
+  id            Int       @id @default(autoincrement())
+  shift         Shift     @relation(fields: [shiftId], references: [id])
+  shiftId       Int
+  user          User      @relation(fields: [userId], references: [id])
+  userId        String
+}
+
+model Order {
+  id            Int       @id @default(autoincrement())
+  tableNumber   String
+  status        OrderStatus @default(OPEN)
+  totalPrice    Decimal
+  createdAt     DateTime  @default(now())
+  paidAt        DateTime?
+  waiter        User      @relation("CreatedBy", fields: [waiterId], references: [id])
+  waiterId      String
+  cashier       User?     @relation("PaidBy", fields: [cashierId], references: [id])
+  cashierId     String?
+  shift         Shift     @relation(fields: [shiftId], references: [id])
+  shiftId       Int
+  items         OrderItem[]
+  payments      Payment[]
+}
+
+model OrderItem {
+  id            Int       @id @default(autoincrement())
+  order         Order     @relation(fields: [orderId], references: [id])
+  orderId       Int
+  menuItem      MenuItem  @relation(fields: [menuItemId], references: [id])
+  menuItemId    Int
+  quantity      Int
+  price         Decimal
+}
+
+model MenuStopList {
+  id            Int       @id @default(autoincrement())
+  menuItem      MenuItem  @relation(fields: [menuItemId], references: [id])
+  menuItemId    Int
+  shift         Shift     @relation(fields: [shiftId], references: [id])
+  shiftId       Int
+}
+
+model IngredientStopList {
+  id            Int       @id @default(autoincrement())
+  ingredient    Ingredient @relation(fields: [ingredientId], references: [id])
+  ingredientId  Int
+  shift         Shift     @relation(fields: [shiftId], references: [id])
+  shiftId       Int
+}
+
+model Payment {
+  id            Int       @id @default(autoincrement())
+  order         Order     @relation(fields: [orderId], references: [id])
+  orderId       Int
+  amount        Decimal
+  paymentType   PaymentType
+  paidBy        User      @relation(fields: [paidById], references: [id])
+  paidById      String
+  paidAt        DateTime  @default(now())
+} 
