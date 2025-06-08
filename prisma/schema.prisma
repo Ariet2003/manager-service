@@ -45,6 +45,7 @@ model User {
   managedShifts Shift[]   @relation("ManagedBy")
   deliveries    Delivery[]
   menuItems     MenuItem[]
+  categories    MenuCategory[]
 }
 
 model Ingredient {
@@ -93,6 +94,8 @@ model MenuItem {
   ingredients   MenuIngredient[]
   orderItems    OrderItem[]
   stopList      MenuStopList[]
+  category      MenuCategory?  @relation(fields: [categoryId], references: [id])
+  categoryId    Int?
 }
 
 model MenuIngredient {
@@ -177,4 +180,16 @@ model Payment {
   paidBy        User      @relation(fields: [paidById], references: [id])
   paidById      String
   paidAt        DateTime  @default(now())
+}
+
+model MenuCategory {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String?
+  imageUrl    String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  createdBy   User      @relation(fields: [createdById], references: [id])
+  createdById String
+  menuItems   MenuItem[]
 } 

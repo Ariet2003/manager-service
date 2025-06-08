@@ -173,7 +173,7 @@ export default function MenuPage() {
   };
 
   const formatDate = (dateString: string | null) => {
-    if (!dateString) return 'Нет данных';
+    if (!dateString) return 'Не указана';
     return new Date(dateString).toLocaleDateString('ru-RU', {
       day: '2-digit',
       month: '2-digit',
@@ -385,11 +385,11 @@ export default function MenuPage() {
                           <div className="flex flex-col gap-1">
                             <p className="text-sm text-gray-500 flex items-center gap-1">
                               <ShoppingCartIcon className="w-4 h-4" />
-                              В наличии: {formatQuantity(ingredient.quantity, ingredient.unit)}
+                              В наличии: {formatQuantity(ingredient.inStock, ingredient.unit)}
                             </p>
                             <p className="text-sm text-gray-500 flex items-center gap-1">
                               <ClockIcon className="w-4 h-4" />
-                              Поставка: {formatDate(ingredient.lastDeliveryDate)}
+                              Поставка: {formatDate(ingredient.lastDeliveryDate || ingredient.createdAt)}
                             </p>
                           </div>
                         </div>
