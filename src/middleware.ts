@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
 // Маршруты, которые не требуют аутентификации
-const publicRoutes = ['/', '/login'];
+const publicRoutes = ['/'];
 
 // Маршруты API, которые не требуют аутентификации
 const publicApiRoutes = ['/api/auth/login'];
