@@ -39,7 +39,6 @@ export default function DashboardPage() {
               </h1>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-gray-600 text-sm">Иван Иванов</span>
               <Button
                 variant="secondary"
                 onClick={handleLogout}

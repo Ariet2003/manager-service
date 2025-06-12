@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     const authToken = Buffer.from(JSON.stringify({
       userId: user.id,
       role: user.role,
-      exp: Date.now() + 24 * 60 * 60 * 1000, // 24 часа
+      exp: Date.now() + 30 * 24 * 60 * 60 * 1000, // 30 дней
     })).toString('base64');
 
     // Устанавливаем куки
@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 24 * 60 * 60, // 24 часа
+      maxAge: 30 * 24 * 60 * 60, // 30 дней
       path: '/',
     });
 
