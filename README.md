@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Система управления рестораном 🍽️
 
-## Getting Started
+Современная система управления для ресторанного бизнеса, разработанная с использованием Next.js, TypeScript, Prisma и PostgreSQL.
 
-First, run the development server:
+## Возможности 🚀
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Управление сменами**
+  - Открытие/закрытие смен
+  - Назначение сотрудников (кассиров и официантов)
+  - Контроль активных смен
+
+- **Управление заказами**
+  - Создание и обработка заказов
+  - Различные типы оплаты (наличные, карта, QR-код)
+  - История заказов
+
+- **Меню и товары**
+  - Управление меню и категориями
+  - Контроль ингредиентов
+  - Стоп-лист
+
+- **Управление персоналом**
+  - Разграничение ролей (администратор, менеджер, кассир, официант)
+  - Контроль активности сотрудников
+  - Управление доступом
+
+- **Поставки и списания**
+  - Учет поставок ингредиентов
+  - Управление поставщиками
+  - Различные типы списаний
+
+## Технологический стек 💻
+
+- **Frontend:**
+  - Next.js 14
+  - TypeScript
+  - Tailwind CSS
+  - React Query
+  - HeadlessUI
+
+- **Backend:**
+  - Next.js API Routes
+  - Prisma ORM
+  - PostgreSQL
+  - NextAuth.js
+
+## Установка и запуск 🛠️
+
+1. **Клонирование репозитория:**
+   ```bash
+   git clone [url-репозитория]
+   cd manager-service
+   ```
+
+2. **Установка зависимостей:**
+   ```bash
+   npm install
+   ```
+
+3. **Настройка базы данных:**
+   ```bash
+   # Создание .env файла
+   cp .env.example .env
+   # Редактируйте .env и укажите DATABASE_URL
+
+   # Применение миграций
+   npm run prisma:migrate
+   
+   # Заполнение начальными данными
+   npm run db:seed
+   ```
+
+4. **Запуск приложения:**
+   ```bash
+   npm run dev
+   ```
+
+   Приложение будет доступно по адресу [http://localhost:3000](http://localhost:3000)
+
+## Структура проекта 📁
+
+```
+manager-service/
+├── src/
+│   ├── app/              # Next.js App Router
+│   ├── components/       # React компоненты
+│   ├── lib/             # Общие утилиты и конфигурации
+│   └── utils/           # Вспомогательные функции
+├── prisma/
+│   ├── schema.prisma    # Схема базы данных
+│   ├── migrations/      # Миграции базы данных
+│   └── seed.ts         # Скрипт начального заполнения
+└── public/             # Статические файлы
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Команды 📝
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- `npm run dev` - Запуск сервера разработки
+- `npm run build` - Сборка проекта
+- `npm run start` - Запуск production сервера
+- `npm run lint` - Проверка кода
+- `npm run prisma:generate` - Генерация Prisma Client
+- `npm run prisma:migrate` - Применение миграций
+- `npm run prisma:studio` - Запуск Prisma Studio
+- `npm run db:seed` - Заполнение базы данными
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Доступ по умолчанию 🔑
 
-## Learn More
+После запуска `npm run db:seed`, будет создан администратор со следующими данными:
+- Логин: `admin`
+- Пароль: `admin123`
 
-To learn more about Next.js, take a look at the following resources:
+## Лицензия 📄
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+[MIT License](LICENSE)
