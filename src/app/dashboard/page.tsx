@@ -98,7 +98,7 @@ export default function DashboardPage() {
           <NavButton
             href="/inventory"
             icon={<TruckIcon className="w-8 h-8" />}
-            label="Поставки и списание"
+            label="Товародвижение"
           />
 
           <NavButton

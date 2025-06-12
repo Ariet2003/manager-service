@@ -62,7 +62,7 @@ export function ShiftModal({ isOpen, onClose, shift }: ShiftModalProps) {
                       {shift.endedAt && (
                         <p>Конец: {formatDate(shift.endedAt)}</p>
                       )}
-                      <p>Выручка: {totalRevenue.toFixed(2)} ₽</p>
+                      <p>Выручка: {totalRevenue.toFixed(2)} сом</p>
                     </div>
                   </div>
 

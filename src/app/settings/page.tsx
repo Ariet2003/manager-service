@@ -145,7 +145,7 @@ export default function SettingsPage() {
                 placeholder="0"
               />
               <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none">
-                <span className="text-gray-500 sm:text-sm">₽</span>
+                <span className="text-gray-500 sm:text-sm">сом</span>
               </div>
             </div>
           </div>
