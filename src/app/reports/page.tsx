@@ -10,9 +10,11 @@ import {
   ClipboardDocumentListIcon,
   UserGroupIcon,
   FireIcon,
+  ArrowDownTrayIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 import { ru } from 'date-fns/locale';
+import { createAndDownloadExcel } from '@/utils/excel';
 
 type ReportType = 'sales' | 'inventory' | 'employees' | 'popular-items';
 
@@ -50,6 +52,126 @@ const reportOptions: ReportOption[] = [
   },
 ];
 
+const exportToExcel = (data: any, type: ReportType) => {
+  let worksheetData: any[] = [];
+  let fileName = '';
+
+  switch (type) {
+    case 'sales': {
+      fileName = `Отчет_по_продажам_${format(new Date(), 'dd.MM.yyyy')}`;
+      
+      // Общая статистика
+      worksheetData = [
+        ['Общая статистика'],
+        ['Всего заказов', data.stats.totalOrders],
+        ['Общая выручка', `${data.stats.totalRevenue} сом`],
+        ['Средний чек', `${Math.round(data.stats.averageCheck)} сом`],
+        [],
+        ['Способы оплаты'],
+        ...Object.entries(data.stats.paymentsByType).map(([type, amount]) => [
+          type === 'CASH' ? 'Наличные' :
+          type === 'CARD' ? 'Карта' :
+          type === 'QR' ? 'QR-код' : 'Другое',
+          `${amount} сом`
+        ]),
+        [],
+        ['Статистика по официантам'],
+        ['Официант', 'Количество заказов', 'Выручка', 'Средний чек'],
+        ...data.stats.waiterStats.map((waiter: any) => [
+          waiter.name,
+          waiter.ordersCount,
+          `${waiter.totalRevenue} сом`,
+          `${Math.round(waiter.totalRevenue / waiter.ordersCount)} сом`
+        ]),
+        [],
+        ['Популярные блюда'],
+        ['Название', 'Количество', 'Выручка'],
+        ...data.stats.popularItems.map((item: any) => [
+          item.name,
+          item.quantity,
+          `${item.revenue} сом`
+        ]),
+        [],
+        ['Список заказов'],
+        ['№', 'Стол', 'Дата оплаты', 'Официант', 'Кассир', 'Способ оплаты', 'Сумма'],
+        ...data.orders.map((order: any) => [
+          order.id,
+          order.tableNumber,
+          format(new Date(order.paidAt), 'dd.MM.yyyy HH:mm'),
+          order.waiterName,
+          order.cashierName,
+          order.paymentTypes.map((type: string) =>
+            type === 'CASH' ? 'Наличные' :
+            type === 'CARD' ? 'Карта' :
+            type === 'QR' ? 'QR-код' : 'Другое'
+          ).join(', '),
+          `${order.totalPrice} сом`
+        ])
+      ];
+      break;
+    }
+
+    case 'inventory': {
+      fileName = `Отчет_по_инвентаризации_${format(new Date(), 'dd.MM.yyyy')}`;
+      worksheetData = [
+        ['Состояние склада'],
+        ['Ингредиент', 'Ед. изм.', 'На складе', 'Поставки', 'Списания'],
+        ...data.ingredients.map((ingredient: any) => [
+          ingredient.name,
+          ingredient.unit,
+          ingredient.inStock,
+          ingredient.deliveries.reduce((sum: number, d: any) => sum + Number(d.quantity), 0),
+          ingredient.writeOffs.reduce((sum: number, w: any) => sum + Number(w.quantity), 0)
+        ])
+      ];
+      break;
+    }
+
+    case 'employees': {
+      fileName = `Отчет_по_сменам_${format(new Date(), 'dd.MM.yyyy')}`;
+      worksheetData = [
+        ['Отчет по сменам'],
+        [],
+        ...data.shifts.flatMap((shift: any) => [
+          [`Смена #${shift.id} (${format(new Date(shift.startedAt), 'dd.MM.yyyy')})`],
+          ['Менеджер:', shift.manager.fullName],
+          [],
+          ['Персонал на смене:'],
+          ['Сотрудник', 'Роль'],
+          ...shift.staff.map((staff: any) => [
+            staff.user.fullName,
+            staff.user.role
+          ]),
+          [],
+          ['Статистика смены:'],
+          ['Количество заказов', shift.orders.length],
+          ['Выручка', `${shift.orders.reduce((sum: number, order: any) => sum + Number(order.totalPrice), 0)} сом`],
+          [],
+          []
+        ])
+      ];
+      break;
+    }
+
+    case 'popular-items': {
+      fileName = `Отчет_по_популярным_блюдам_${format(new Date(), 'dd.MM.yyyy')}`;
+      worksheetData = [
+        ['Топ популярных блюд'],
+        ['Название', 'Количество продаж', 'Цена', 'Выручка'],
+        ...data.items.map((item: any) => [
+          item.details.name,
+          item._sum.quantity,
+          `${item.details.price} сом`,
+          `${Number(item.details.price) * item._sum.quantity} сом`
+        ])
+      ];
+      break;
+    }
+  }
+
+  createAndDownloadExcel(worksheetData, 'Отчет', fileName);
+};
+
 export default function ReportsPage() {
   const router = useRouter();
   const [selectedReport, setSelectedReport] = useState<ReportType | null>(null);
@@ -76,12 +198,70 @@ export default function ReportsPage() {
         `/api/reports?type=${selectedReport}&startDate=${startDate}&endDate=${endDate}`
       );
       const data = await response.json();
+      console.log('Fetched report data:', { type: selectedReport, data });
       setReportData(data);
     } catch (error) {
       console.error('Error fetching report:', error);
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleExport = () => {
+    console.log('Export button clicked, data:', { type: selectedReport, data: reportData });
+    if (!reportData || !selectedReport) return;
+    exportToExcel(reportData, selectedReport);
+  };
+
+  const canExport = () => {
+    console.log('Checking can export:', { 
+      selectedReport, 
+      hasReportData: !!reportData,
+      isLoading 
+    });
+
+    if (!reportData || !selectedReport || isLoading) {
+      console.log('Basic checks failed');
+      return false;
+    }
+    
+    let result = false;
+    switch (selectedReport) {
+      case 'sales':
+        result = !!(reportData.orders?.length > 0 || reportData.stats);
+        console.log('Sales check:', { 
+          hasOrders: !!reportData.orders, 
+          ordersLength: reportData.orders?.length,
+          hasStats: !!reportData.stats,
+          result 
+        });
+        break;
+      case 'inventory':
+        result = !!(reportData.ingredients?.length > 0);
+        console.log('Inventory check:', { 
+          hasIngredients: !!reportData.ingredients,
+          ingredientsLength: reportData.ingredients?.length,
+          result 
+        });
+        break;
+      case 'employees':
+        result = !!(reportData.shifts?.length > 0);
+        console.log('Employees check:', { 
+          hasShifts: !!reportData.shifts,
+          shiftsLength: reportData.shifts?.length,
+          result 
+        });
+        break;
+      case 'popular-items':
+        result = !!(reportData.items?.length > 0);
+        console.log('Popular items check:', { 
+          hasItems: !!reportData.items,
+          itemsLength: reportData.items?.length,
+          result 
+        });
+        break;
+    }
+    return result;
   };
 
   const renderReportContent = () => {
@@ -373,6 +553,16 @@ export default function ReportsPage() {
               Отчеты
             </h1>
             <div className="flex items-center gap-4">
+              {canExport() && (
+                <Button
+                  variant="primary"
+                  onClick={handleExport}
+                  className="text-sm px-4 py-2 rounded-lg flex items-center gap-2"
+                >
+                  <ArrowDownTrayIcon className="w-4 h-4" />
+                  Экспорт
+                </Button>
+              )}
               <Button
                 variant="secondary"
                 onClick={() => router.push('/dashboard')}
