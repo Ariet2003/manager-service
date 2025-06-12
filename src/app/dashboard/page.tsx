@@ -6,6 +6,8 @@ import { NavButton } from '@/components/ui/NavButton';
 import {
   TruckIcon,
   ClockIcon,
+  Cog6ToothIcon,
+  ChartBarIcon,
 } from '@heroicons/react/24/outline';
 
 export default function DashboardPage() {
@@ -103,6 +105,18 @@ export default function DashboardPage() {
             href="/shifts-history"
             icon={<ClockIcon className="w-8 h-8" />}
             label="История смен"
+          />
+
+          <NavButton
+            href="/reports"
+            icon={<ChartBarIcon className="w-8 h-8" />}
+            label="Отчеты"
+          />
+
+          <NavButton
+            href="/settings"
+            icon={<Cog6ToothIcon className="w-8 h-8" />}
+            label="Настройки"
           />
         </div>
       </main>
